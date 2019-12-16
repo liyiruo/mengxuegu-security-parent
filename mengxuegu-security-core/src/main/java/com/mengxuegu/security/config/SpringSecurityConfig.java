@@ -1,7 +1,9 @@
 package com.mengxuegu.security.config;
 
+import com.mengxuegu.security.properties.SecurityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -18,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableWebSecurity //启动 SpringSecurity 过滤器链功能
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private SecurityProperties securityProperties;
     Logger logger = LoggerFactory.getLogger(getClass());
 
     @Bean
@@ -64,13 +68,13 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         //super.configure(http);
         //http.httpBasic()
         http.formLogin()// 表单认证
-                .loginPage("/login/page")// 交给 /login/page 响应认证(登录)页面
-                .loginProcessingUrl("/login/form")// 登录表单提交处理Url, 默认是 /login
-                .usernameParameter("name")// 默认用户名的属性名是 username
-                .passwordParameter("pwd")// 默认密码的属性名是 password
+                .loginPage(securityProperties.getAuthentication().getLoginPage())// 交给 /login/page 响应认证(登录)页面
+                .loginProcessingUrl(securityProperties.getAuthentication().getLoginProcessingUrl())// 登录表单提交处理Url, 默认是 /login
+                .usernameParameter(securityProperties.getAuthentication().getUsernameParameter())// 默认用户名的属性名是 username
+                .passwordParameter(securityProperties.getAuthentication().getPasswordParameter())// 默认密码的属性名是 password
                 .and()
                 .authorizeRequests()//认证请求
-                .antMatchers("/login/page").permitAll()// 放行跳转认证请求
+                .antMatchers(securityProperties.getAuthentication().getLoginPage()).permitAll()// 放行跳转认证请求
                 .anyRequest().authenticated()// 所有进入应用的HTTP请求都要进行认证
         ;
     }
@@ -82,7 +86,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         //super.configure(web);
-        web.ignoring().antMatchers(("/dist/**"), "/modules/**", "/plugins/**");
+        web.ignoring().antMatchers(securityProperties.getAuthentication().getStaticPaths());
     }
 
 }
