@@ -18,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+
+import javax.sql.DataSource;
 
 /**
  * 安全控制中心
@@ -39,9 +42,19 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthenticationSuccessHandler customAuthenticationSuccessHandler;
     @Autowired
     private AuthenticationFailureHandler customAuthenticationFailureHandler;
-
     @Autowired
     ImageCodeValidateFilter imageCodeValidateFilter;
+    @Autowired
+    DataSource dataSource;
+
+    @Bean
+    public JdbcTokenRepositoryImpl jdbcTokenRepository() {
+        JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
+        jdbcTokenRepository.setDataSource(dataSource);
+        // 是否启动时自动创建表，第一次启动创建就行，后面启动把这个注释掉,不然报错已存在表
+//         jdbcTokenRepository.setCreateTableOnStartup(true);
+        return jdbcTokenRepository;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -109,11 +122,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .failureHandler(customAuthenticationFailureHandler)//认证失败处理器
                 .and()
                 .authorizeRequests()//认证请求
-                .antMatchers(securityProperties.getAuthentication().getLoginPage(),"/code/image")
+                .antMatchers(securityProperties.getAuthentication().getLoginPage(), "/code/image")
                 .permitAll()// 放行跳转认证请求
                 .anyRequest().authenticated()// 所有进入应用的HTTP请求都要进行认证
+                .and()
+                .rememberMe()  //记住我
+                .tokenRepository(jdbcTokenRepository()) // 保存登录信息
+                .tokenValiditySeconds(60*60*24*7) // 记住我有效时长（秒）
         ;
-
     }
 
     /**

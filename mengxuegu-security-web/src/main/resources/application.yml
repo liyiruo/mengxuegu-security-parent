@@ -3,7 +3,13 @@ server:
 spring:
   thymeleaf:
     cache: false
-
+  # 数据源配置
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://106.13.232.5:3306/study-security?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8
+    #mysql8版本以上驱动包指定新的驱动类
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 mengxuegu:
   security:
