@@ -16,3 +16,4 @@ mengxuegu:
       - /dist/**
       - /modules/**
       - /plugins/**
+      loginType: REDIRECT # 认证之后 响应的类型：JSON/REDIRECT

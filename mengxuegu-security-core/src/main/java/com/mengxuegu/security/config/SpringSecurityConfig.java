@@ -1,5 +1,6 @@
 package com.mengxuegu.security.config;
 
+import com.mengxuegu.security.authentication.code.ImageCodeValidateFilter;
 import com.mengxuegu.security.properties.SecurityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +12,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * 安全控制中心
@@ -22,7 +27,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private SecurityProperties securityProperties;
+    //com.mengxuegu.security.CustomUserDetailsService类上的注解@Component("customUserDetailsService")
+    // 与下面的变量名保持一致
+    @Autowired
+    private UserDetailsService customUserDetailsService;
     Logger logger = LoggerFactory.getLogger(getClass());
+    /**
+     * 注入自定义的认证成功处理器
+     */
+    @Autowired
+    private AuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    @Autowired
+    private AuthenticationFailureHandler customAuthenticationFailureHandler;
+
+    @Autowired
+    ImageCodeValidateFilter imageCodeValidateFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -31,6 +50,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     /*PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     PasswordEncoder passwordEncoder1 = NoOpPasswordEncoder.getInstance();*/
+
     /**
      * 身份认证管理器：
      * 认证信息提供方式（用户名、密码、当前用户的资源权限）
@@ -41,7 +61,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+
         // 用户信息存储在内存中
+
+        /*
         String password = passwordEncoder().encode("root");
         logger.info("加密之后存储的密码：" + password);
 
@@ -50,6 +74,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .withUser("root")
                 .password(password)
                 .authorities("ADMIN");
+
+        */
+
+
+        // 用户信息存储在数据库中
+        auth.userDetailsService(customUserDetailsService);
+
+
     }
 
     /**
@@ -67,26 +99,34 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         //super.configure(http);
         //http.httpBasic()
-        http.formLogin()// 表单认证
+        http.addFilterBefore(imageCodeValidateFilter, UsernamePasswordAuthenticationFilter.class)//校验验证码
+                .formLogin()// 表单认证
                 .loginPage(securityProperties.getAuthentication().getLoginPage())// 交给 /login/page 响应认证(登录)页面
                 .loginProcessingUrl(securityProperties.getAuthentication().getLoginProcessingUrl())// 登录表单提交处理Url, 默认是 /login
                 .usernameParameter(securityProperties.getAuthentication().getUsernameParameter())// 默认用户名的属性名是 username
                 .passwordParameter(securityProperties.getAuthentication().getPasswordParameter())// 默认密码的属性名是 password
+                .successHandler(customAuthenticationSuccessHandler)//认证成功处理器
+                .failureHandler(customAuthenticationFailureHandler)//认证失败处理器
                 .and()
                 .authorizeRequests()//认证请求
-                .antMatchers(securityProperties.getAuthentication().getLoginPage()).permitAll()// 放行跳转认证请求
+                .antMatchers(securityProperties.getAuthentication().getLoginPage(),"/code/image")
+                .permitAll()// 放行跳转认证请求
                 .anyRequest().authenticated()// 所有进入应用的HTTP请求都要进行认证
         ;
+
     }
 
     /**
      * 一般用来放行静态资源
+     *
      * @param web
      */
     @Override
     public void configure(WebSecurity web) {
         //super.configure(web);
-        web.ignoring().antMatchers(securityProperties.getAuthentication().getStaticPaths());
+        web.ignoring()
+                .antMatchers(
+                        securityProperties.getAuthentication().getStaticPaths());
     }
 
 }
