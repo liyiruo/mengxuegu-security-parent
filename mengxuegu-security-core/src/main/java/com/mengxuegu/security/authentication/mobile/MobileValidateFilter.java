@@ -53,7 +53,8 @@ public class MobileValidateFilter extends OncePerRequestFilter {
         if (StringUtils.isBlank(inputCode)) {
             throw new ValidateCodeExcetipn.ValidateCodeException("短信验证码不能为空");
         }
-        if (inputCode.equalsIgnoreCase(sessionCode)) {
+        //是这里错了吗？是这里错了，少写了一个"!"
+        if (!inputCode.equalsIgnoreCase(sessionCode)) {
             throw new ValidateCodeExcetipn.ValidateCodeException("短信验证码不正确");
         }
     }
