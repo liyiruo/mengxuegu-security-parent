@@ -64,3 +64,23 @@ doc/*.txt # 会忽略 doc/notes.txt 但不包括 doc/server/arch.txt
  4) PersistentTokenBasedRememberMeServices 是 RememberMeServices 的启动Remember-Me 默认实现 , 
  它会通过 cookie 值进行查询数据库存储的记录, 来实现自动登录 ，并重新生成新的 cookie 存储。
 
+#6.3 手机短信验证码认证功能
+
+手机号登录是不需要密码的，通过短信验证码实现免密登录功能。
+1. 向手机发送手机验证码，使用第三方短信平台 SDK 发送，如: 阿里云短信服务（阿里大于）
+2. 登录表单输入短信验证码
+3. 使用自定义过滤器 MobileValidateFilter
+4. 当验证码校验通过后，进入自定义手机认证过滤器 MobileAuthenticationFilter 校验手机号是否存在
+5. 自定义 MobileAuthenticationToken 提供给  MobileAuthenticationFilter
+6. 自定义 MobileAuthenticationProvider 提供给 ProviderManager 处理
+7. 创建针对手机号查询用户信息的  MobileUserDetailsService ，交给  MobileAuthenticationProvider
+8. 自定义 MobileAuthenticationConfig 配置类将上面组件连接起来，添加到容器中
+9. 将 MobileAuthenticationConfig 添加到 SpringSecurityConfig 安全配置的过滤器链上。
+#6.3.2 创建短信发送服务接口
+#6.3.3 手机登录页与发送短信验证码
+#6.3.4 实现短信验证码校验过滤器 MobileValidateFilter （这一段比较难以理解）
+#6.3.5 实现手机认证过滤器 MobileAuthenticationFilter
+#6.3.6 封装手机认证Token MobileAuthenticationToken
+#6.3.7 实现手机认证提供者 MobileAuthenticationProvider
+#6.3.8 手机号获取用户信息 MobileUserDetailsService
+#6.3.9 自定义管理认证配置 MobileAuthenticationConfig

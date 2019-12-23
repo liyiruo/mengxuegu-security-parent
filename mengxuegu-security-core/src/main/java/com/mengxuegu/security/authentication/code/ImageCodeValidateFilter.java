@@ -1,6 +1,7 @@
 package com.mengxuegu.security.authentication.code;
 
 import com.mengxuegu.security.authentication.CustomAuthenticationFailureHandler;
+import com.mengxuegu.security.authentication.exception.ValidateCodeExcetipn;
 import com.mengxuegu.security.controller.CustomLoginController;
 import com.mengxuegu.security.properties.SecurityProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.ValidationException;
 import java.io.IOException;
 
 /**
@@ -68,10 +68,10 @@ public class ImageCodeValidateFilter extends OncePerRequestFilter {
         String inputcode = request.getParameter("code");
         //判断是否正确
         if (StringUtils.isBlank(inputcode)) {
-            throw new ValidateCodeException("验证码不能为空");
+            throw new ValidateCodeExcetipn.ValidateCodeException("验证码不能为空");
         }
         if (!inputcode.equalsIgnoreCase(sessionCode)) {
-            throw new ValidateCodeException("验证码不正确");
+            throw new ValidateCodeExcetipn.ValidateCodeException("验证码不正确");
         }
     }
 }

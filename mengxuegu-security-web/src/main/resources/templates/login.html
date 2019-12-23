@@ -29,7 +29,7 @@
     <div class="card-body login-card-body">
       <p class="login-box-msg">请登录</p>
       
-      <a href="login-mobile.html" style="float:right;font-size: 13px;">
+      <a th:href="@{/mobile/page}" href="login-mobile.html" style="float:right;font-size: 13px;">
         <i class="fa fa-envelope mr-1"></i>使用短信验证登录
       </a>
       <form th:action="@{/login/form}" action="index.html" method="post">
