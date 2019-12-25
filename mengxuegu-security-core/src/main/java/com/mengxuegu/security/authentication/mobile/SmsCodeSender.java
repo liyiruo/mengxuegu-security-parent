@@ -13,7 +13,7 @@ public class SmsCodeSender implements SmsSend {
     public boolean sendSms(String mobile, String content) {
 
         String sendContent = String.format("梦学员，验证码%s，请勿泄露他人。", content);
-        logger.info("向手机号" + mobile + "发送的短信为:" + sendContent);
+        logger.info("SmsCodeSender向手机号" + mobile + "发送的短信为:" + sendContent);
         return true;
     }
 }

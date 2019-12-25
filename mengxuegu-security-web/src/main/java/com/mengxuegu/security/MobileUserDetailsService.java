@@ -14,9 +14,12 @@ public class MobileUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String mobile) throws UsernameNotFoundException {
-        log.info("请求的手机号是{}",mobile);
+        log.info("请求的手机号是{}", mobile);
         //1.通过手机号查询用户信息:
+
+         mobile = "meng";
         //2.如果有此用户，则查询用户权限
+        String auth = "ADMIN";
         //3.封装用户信息
         /**
          * private String password;
@@ -34,6 +37,6 @@ public class MobileUserDetailsService implements UserDetailsService {
                 true,
                 true,
                 true,
-                AuthorityUtils.commaSeparatedStringToAuthorityList("ADMIN"));
+                AuthorityUtils.commaSeparatedStringToAuthorityList(auth));
     }
 }
