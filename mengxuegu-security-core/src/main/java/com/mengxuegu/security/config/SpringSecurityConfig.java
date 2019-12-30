@@ -21,6 +21,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.session.InvalidSessionStrategy;
+import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 
 import javax.sql.DataSource;
 
@@ -52,6 +54,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     MobileValidateFilter mobileValidateFilter;
     @Autowired
     MobileAuthenticationConfig mobileAuthenticationConfig;
+    @Autowired
+    private InvalidSessionStrategy invalidSessionStrategy;
+
+    @Autowired
+    private SessionInformationExpiredStrategy sessionInformationExpiredStrategy;
 
     @Bean
     public JdbcTokenRepositoryImpl jdbcTokenRepository() {
@@ -63,7 +70,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     *  明文+随机盐值》加密存储
+     * 明文+随机盐值》加密存储
+     *
      * @return
      */
     @Bean
@@ -73,10 +81,12 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     /*PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     PasswordEncoder passwordEncoder1 = NoOpPasswordEncoder.getInstance();*/
+
     /**
      * 身份认证管理器：
      * 认证信息提供方式（用户名、密码、当前用户的资源权限）
      * 可采用内存存储方式，也可能采用数据库方式等
+     *
      * @param auth
      * @throws Exception
      */
@@ -136,12 +146,18 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .rememberMe()  //记住我
                 .tokenRepository(jdbcTokenRepository()) // 保存登录信息
                 .tokenValiditySeconds(securityProperties.getAuthentication().getTokenValiditySeconds()) // 记住我有效时长（秒）
+                .and()
+                .sessionManagement()//session管理
+                .invalidSessionStrategy(invalidSessionStrategy)//session失效后的处理逻辑
+                .maximumSessions(1)//每个用户最多有多少个session
+                .expiredSessionStrategy(sessionInformationExpiredStrategy)//超过最大数执行这个策略
         ;
         http.apply(mobileAuthenticationConfig);
     }
 
     /**
      * 一般用来放行静态资源
+     *
      * @param web
      */
     @Override

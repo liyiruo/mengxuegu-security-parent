@@ -1,5 +1,8 @@
 server:
   port: 80
+  servlet:
+    session:
+      timeout: 10m  #最小1m  默认30m
 spring:
   thymeleaf:
     cache: false
