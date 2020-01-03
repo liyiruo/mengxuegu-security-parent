@@ -18,14 +18,17 @@ public class CustomSessionInformationExpiredStrategy implements SessionInformati
 
     @Autowired
     CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
     @Override
     public void onExpiredSessionDetected(SessionInformationExpiredEvent event) throws IOException {
 
-        UserDetails principal =(UserDetails) event.getSessionInformation().getPrincipal();
-        AuthenticationException exception = new AuthenticationServiceException("[%s]用户在另一台电脑登录，你已被下线");
+        UserDetails principal = (UserDetails) event.getSessionInformation().getPrincipal();
+        AuthenticationException exception =
+                new AuthenticationServiceException(
+                        String.format("[%s]用户在另一台电脑登录，你已被下线", principal.getUsername()));
         try {
-            event.getRequest().setAttribute("toAuthentication",true);
-            customAuthenticationFailureHandler.onAuthenticationFailure(event.getRequest(),event.getResponse(),exception);
+            event.getRequest().setAttribute("toAuthentication", true);
+            customAuthenticationFailureHandler.onAuthenticationFailure(event.getRequest(), event.getResponse(), exception);
         } catch (ServletException e) {
             e.printStackTrace();
         }

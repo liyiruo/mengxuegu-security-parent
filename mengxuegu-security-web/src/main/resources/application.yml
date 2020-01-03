@@ -3,6 +3,8 @@ server:
   servlet:
     session:
       timeout: 10m  #最小1m  默认30m
+      cookie:
+        name: JSESSIONID #指定浏览器中关于sessionid 保存的名称
 spring:
   thymeleaf:
     cache: false
@@ -13,7 +15,13 @@ spring:
     url: jdbc:mysql://106.13.232.5:3306/study-security?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8
     #mysql8版本以上驱动包指定新的驱动类
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+  session:
+    store-type: none #session存储方式采用redis
+  redis:
+    port: 6379
+#    client-name:
+#    host:
+#    password:
 mengxuegu:
   security:
     authentication:

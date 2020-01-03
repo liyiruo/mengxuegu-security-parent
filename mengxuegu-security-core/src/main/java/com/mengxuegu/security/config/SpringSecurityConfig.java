@@ -3,6 +3,7 @@ package com.mengxuegu.security.config;
 import com.mengxuegu.security.authentication.code.ImageCodeValidateFilter;
 import com.mengxuegu.security.authentication.mobile.MobileAuthenticationConfig;
 import com.mengxuegu.security.authentication.mobile.MobileValidateFilter;
+import com.mengxuegu.security.authentication.session.CustomLogoutHandler;
 import com.mengxuegu.security.properties.SecurityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,10 +59,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     MobileAuthenticationConfig mobileAuthenticationConfig;
     @Autowired
     private InvalidSessionStrategy invalidSessionStrategy;
-
     @Autowired
     private SessionInformationExpiredStrategy sessionInformationExpiredStrategy;
-
+    @Autowired
+   private CustomLogoutHandler customLogoutHandler;
     @Bean
     public JdbcTokenRepositoryImpl jdbcTokenRepository() {
         JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
@@ -116,7 +119,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
      * 定义认证方式： httpBasic 、 httpForm
      * 定制登录页面、登录请求地址、错误处理方式
      * 自定义 spring security 过滤器等
-     *
      * @param http
      * @throws Exception
      */
@@ -151,13 +153,30 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidSessionStrategy(invalidSessionStrategy)//session失效后的处理逻辑
                 .maximumSessions(1)//每个用户最多有多少个session
                 .expiredSessionStrategy(sessionInformationExpiredStrategy)//超过最大数执行这个策略
+                .maxSessionsPreventsLogin(true)
+                .sessionRegistry(sessionRegistry())
+                .and().and()
+                .logout()
+                .addLogoutHandler(customLogoutHandler)// +++ 退出处理
+                .logoutUrl("/user/logout")
+                .logoutSuccessUrl("/mobile/page")
+                .deleteCookies("JSESSIONID")//退出时删除cookie值
+                .and()
+                .csrf().disable();
         ;
         http.apply(mobileAuthenticationConfig);
     }
 
     /**
+     * 为了解决退出重新登录的问题
+     * @return
+     */
+    @Bean
+    public SessionRegistry sessionRegistry(){
+        return new SessionRegistryImpl();
+    }
+    /**
      * 一般用来放行静态资源
-     *
      * @param web
      */
     @Override

@@ -97,4 +97,11 @@ doc/*.txt # 会忽略 doc/notes.txt 但不包括 doc/server/arch.txt
 ####6.5 获取当前用户认证信息
 ####6.6 重构实现路径可配置
 
+## Session 会话管理
+####7.1.1 application.yml 配置超时时间
+#### 7.2 自定义 Session 失效处理
+#### 7.3 用户只允许一个地方登录
+#### 7.5 退出系统
+
+
 

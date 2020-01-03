@@ -50,9 +50,10 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
             // super.setDefaultFailureUrl(securityProperties.getAuthentication().getLoginPage()+"?error");
             String referer = request.getHeader("Referer");
             Object toAuthentication = request.getAttribute("toAuthentication");
-            
             logger.info("referer====>{}" + referer);
-            String lastUrl = StringUtils.substringBefore(referer, "?");
+
+            String lastUrl =   toAuthentication!=null?securityProperties.getAuthentication().getLoginPage():
+                    StringUtils.substringBefore(referer, "?");
             logger.info("上一次请求的路径url路径===》{}" + lastUrl);
             super.setDefaultFailureUrl(lastUrl + "?error");
             super.onAuthenticationFailure(request, response, e);
